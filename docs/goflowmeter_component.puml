@@ -1,0 +1,48 @@
+@startuml
+!theme plain
+title goflowmeter - Component view
+
+package "flowmeter (public API)" {
+  [ProcessPacketsWithKeys\n(packets to FlowWithKey)] as API
+  [ConvertToPacketInfo\n(raw to PacketInfo)] as Convert
+  [CanonicalFlowKey] as Canonical
+}
+
+package "compute pipeline" {
+  [computeBasic] as Basic
+  [computeCounts] as Counts
+  [computePacketLen] as PacketLen
+  [computeIAT] as IAT
+  [computeFlags] as Flags
+  [computeRates] as Rates
+  [computeRatio] as Ratio
+  [computeBulk] as Bulk
+  [computeSubflow] as Subflow
+  [computeActiveIdle] as ActiveIdle
+  [computeInitWin] as InitWin
+}
+
+package "stats (shared)" {
+  [StatsFromValues\nMinMaxMeanStd\nVariance] as Stats
+}
+
+API --> Canonical : group by flow key
+API --> Basic
+API --> Counts
+API --> PacketLen
+API --> IAT
+API --> Flags
+API --> Rates
+API --> Ratio
+API --> Bulk
+API --> Subflow
+API --> ActiveIdle
+API --> InitWin
+Convert --> Canonical : canonical key
+PacketLen --> Stats
+IAT --> Stats
+ActiveIdle --> Stats
+Subflow ..> Counts : uses TotalFwd/Bwd
+Rates ..> Counts : uses TotalFwd/Bwd
+Ratio ..> Counts : uses TotalFwd/Bwd
+@enduml

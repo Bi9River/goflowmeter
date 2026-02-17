@@ -1,0 +1,29 @@
+@startuml
+title goflowmeter - Data flow (sequence)
+
+actor Caller
+participant "ConvertToPacketInfo" as Convert
+participant "ProcessPacketsWithKeys" as API
+participant "[]RawPacket" as Raw
+participant "[]PacketInfo" as Pkts
+participant "byFlow" as ByFlow
+participant "compute*" as Compute
+participant "[]FlowWithKey" as Out
+
+Caller -> Raw : from PCAP / source
+Caller -> Convert : ConvertToPacketInfo(raw)
+Convert -> Convert : group by canonical key, sort by time per flow
+Convert -> Convert : assign Direction (first packet = forward)
+Convert -> Pkts : normalize 5-tuple, one flow per connection
+Convert --> Caller : []PacketInfo
+
+Caller -> API : ProcessPacketsWithKeys(packets)
+API -> API : group by CanonicalFlowKey(p.Key())
+API -> ByFlow : map[FlowKey][]PacketInfo
+loop for each flow
+  API -> API : sort packets by timestamp
+  API -> Compute : computeBasic ... computeInitWin (fill Features)
+  API -> Out : append FlowWithKey{Key, Features}
+end
+API --> Caller : []FlowWithKey
+@enduml

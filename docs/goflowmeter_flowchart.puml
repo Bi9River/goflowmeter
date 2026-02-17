@@ -1,0 +1,23 @@
+@startuml
+!theme plain
+title goflowmeter - Compute pipeline (per flow)
+
+start
+:Group packets by **CanonicalFlowKey**;
+:Sort packets by timestamp;
+
+:computeBasic\n(duration, flow bytes/s, packets/s);
+:computeCounts\n(TotalFwd/Bwd packets and bytes);
+:computePacketLen\n(min/max/mean/std, avg segment size);
+:computeIAT\n(flow/fwd/bwd IAT stats, totals);
+:computeFlags\n(PSH, URG, header len, FIN/SYN/...);
+:computeRates\n(Fwd/Bwd packets/s, ActDataPktFwd, MinSegSizeFwd);
+:computeRatio\n(DownUpRatio = bwd/fwd integer);
+:computeBulk\n(avg bytes/packets/rate per bulk);
+:computeSubflow\n(avg packets/bytes per gap);
+:computeActiveIdle\n(active and idle time stats);
+:computeInitWin\n(init window bytes fwd/bwd);
+
+:Append FlowWithKey{Key, Features} to result;
+stop
+@enduml

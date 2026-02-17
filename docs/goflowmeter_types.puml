@@ -1,0 +1,82 @@
+@startuml
+!theme plain
+title goflowmeter - Main types
+
+enum Direction {
+  Forward
+  Backward
+}
+
+class FlowKey {
+  SrcIP : string
+  DstIP : string
+  SrcPort : uint16
+  DstPort : uint16
+  Protocol : uint8
+}
+
+class RawPacket {
+  Timestamp : time.Time
+  HeaderLen : int
+  PayloadSize : int
+  TCPWindow : uint16
+  SrcIP, DstIP : string
+  SrcPort, DstPort : uint16
+  Protocol : uint8
+  FIN, SYN, RST, PSH, ACK, URG, CWR, ECE : bool
+}
+
+class PacketInfo {
+  Timestamp : time.Time
+  Direction : Direction
+  HeaderLen : int
+  PayloadSize : int
+  TCPWindow : uint16
+  SrcIP, DstIP : string
+  SrcPort, DstPort : uint16
+  Protocol : uint8
+  FIN, SYN, RST, PSH, ACK, URG, CWR, ECE : bool
+  ..
+  Key() : FlowKey
+}
+
+class FlowFeatures {
+  FlowDurationUs, FlowBytesPerSec, FlowPacketsPerSec
+  TotalFwdPackets, TotalBwdPackets, TotalFwdBytes, TotalBwdBytes
+  FwdPacketLen, BwdPacketLen, PacketLen : Stats
+  MinPacketLen, MaxPacketLen, PacketLenMean, PacketLenStd, PacketLenVar, AvgPacketSize, AvgFwdSegmentSize, AvgBwdSegmentSize
+  FlowIAT, FwdIAT, BwdIAT, FwdIATTotal, BwdIATTotal
+  FwdPSHFlag, BwdPSHFlag, FwdURGFlag, BwdURGFlag, FwdHeaderLen, BwdHeaderLen
+  FIN, SYN, RST, PSH, ACK, URG, CWR, ECE : int
+  FwdPacketsPerSec, BwdPacketsPerSec, DownUpRatio
+  FwdAvgBytesPerBulk, FwdAvgPacketsPerBulk, FwdAvgBulkRate
+  BwdAvgBytesPerBulk, BwdAvgPacketsPerBulk, BwdAvgBulkRate
+  SubflowFwdPackets, SubflowFwdBytes, SubflowBwdPackets, SubflowBwdBytes
+  InitWinBytesFwd, InitWinBytesBwd, ActDataPktFwd, MinSegSizeFwd
+  ActiveTime, IdleTime : Stats
+}
+
+class FlowWithKey {
+  Key : FlowKey
+  Features : FlowFeatures
+}
+
+class Stats {
+  Min : float64
+  Max : float64
+  Mean : float64
+  Std : float64
+}
+
+Convert ..> RawPacket : reads
+Convert ..> PacketInfo : writes
+ProcessPacketsWithKeys ..> PacketInfo : reads
+ProcessPacketsWithKeys ..> FlowKey : uses
+ProcessPacketsWithKeys ..> FlowWithKey : returns
+ProcessPacketsWithKeys ..> FlowFeatures : fills
+PacketInfo --> FlowKey : Key()
+FlowWithKey *-- FlowKey : key
+FlowWithKey *-- FlowFeatures : features
+FlowFeatures *-- Stats : multiple
+PacketInfo --> Direction : has
+@enduml
