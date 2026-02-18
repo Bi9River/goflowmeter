@@ -1,12 +1,25 @@
 # flowmeter
 
 This flowmeter extracts CICFlowMeter-style flow features in Go.
-It is designed to be used as a plug-in: the caller provides packets
-(e.g. per time window from PCAP), and the flowmeter returns one feature
-vector per flow. No PCAP path is used inside this module.
+
+It is designed to be used as a plug-in: the caller provides packets (e.g. per time window from PCAP), and the flowmeter returns one feature
+vector per flow. 
+
+No PCAP path is used inside this module.
 
 **API:** `ProcessPacketsWithKeys(packets []PacketInfo) []FlowWithKey` -
 each element has `Key` (5-tuple) and `Features` (flow feature vector).
+
+### Design
+
+[![Component View](docs/component_view.svg)](docs/component_view.svg)
+
+[![Component View](docs/flowchart.svg)](docs/flowchart.svg)
+
+[![Component View](docs/sequence_diagram.svg)](docs/sequence_diagram.svg)
+
+[![Component View](docs/class_diagram.svg)](docs/class_diagram.svg)
+
 
 ### Converter (PCAP → flowmeter)
 
@@ -102,13 +115,13 @@ The flowmeter does not read PCAP. To go from a PCAP file to feature vectors:
 ## Usage
 
 1. Build `[]PacketInfo` from the packet source
-   (e.g. parse PCAP in monolithic/microservice/plugin).
+   (e.g. parse PCAP in the caller).
    Each packet must have: timestamp, direction (Forward/Backward),
    5-tuple (`SrcIP`, `DstIP`, `SrcPort`, `DstPort`, `Protocol`),
    `HeaderLen`, and `PayloadSize`;
    for TCP also set the flag booleans as needed.
 2. Call `flowmeter.ProcessPacketsWithKeys(packets)` once per time window (or per chunk).
-3. Use the returned `[]FlowWithKey` (one per flow; each has Key and Features) for aggregation per window or for ML input.
+3. Use the returned `[]FlowWithKey` (one per flow; each has Key and Features) for aggregation per window or for analysis.
 
 ## Testing
 
