@@ -92,9 +92,7 @@ The flowmeter does not read PCAP. To go from a PCAP file to feature vectors:
 
 ---
 
-## Implementation status
-
-### Implemented
+## Feature List and Modules
 
 | Module | File | Features |
 |---|---|---|
